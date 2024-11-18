@@ -12,7 +12,21 @@
 npm install
 ```
 
-4. Start the development server:
+4. Install sqlite
+- **Linux**: Run these commands
+```bash
+# Ubuntu
+sudo apt install sqlite3
+sudo apt update
+```
+- **Mac OS**: Run these commands
+```bash
+brew install sqlite3
+```
+- **Windows**: follow [this tutorial](https://www.tutorialspoint.com/sqlite/sqlite_installation.htm), as you'll need to go through a lengthy install process.
+
+
+5. Start the development server:
 
 ```bash
 npm run dev
