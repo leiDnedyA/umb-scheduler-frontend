@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 interface Props {
   csrfToken: string
@@ -15,35 +16,23 @@ export default function LoginForm({ csrfToken }: Props) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
+    const result = await signIn("credentials", {
+      redirect: false,
+      username: email,
+      password
+    });
 
-    try {
-      const response = await fetch("/api/auth/callback/credentials", {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          csrfToken: csrfToken,
-          email,
-          password
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      if (response.redirected) {
-        window.location.href = response.url;
-      }
-
-      // router.push('/'); // Redirect after successful login
-    } catch (err) {
-      setError('Invalid credentials');
+    if (result?.error) {
+      console.log(result)
+      setError(result.error);
+    } else {
+      // Successfully signed in, handle navigation or success state
+      router.push('/')
     }
   };
 
   return (
-    <form method="POST" action="/api/auth/callback/credentials" className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-2">
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
           Email

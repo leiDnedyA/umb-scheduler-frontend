@@ -1,12 +1,12 @@
 import NextAuth from 'next-auth';
-import { withAuth } from 'next-auth/middleware';
 import Credentials from 'next-auth/providers/credentials';
 import { z } from 'zod';
-import { db, sqlite } from '@/drizzle';
+import { db } from '@/drizzle';
 import { eq } from 'drizzle-orm'
 import { users } from '@/schemas'
 import bcrypt from 'bcryptjs';
 import { AuthOptions } from 'next-auth';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 export const pages = {
   signIn: '/login',
@@ -14,6 +14,7 @@ export const pages = {
 };
 
 export const authOptions: AuthOptions = {
+  pages,
   providers: [
     Credentials({
       async authorize(credentials) {
@@ -26,13 +27,6 @@ export const authOptions: AuthOptions = {
 
         if (parsedCredentials.success) {
           const { email, password } = parsedCredentials.data;
-
-          console.log(parsedCredentials.data);
-          console.log(credentials)
-
-          const userList = await db.select().from(users);
-          console.log(sqlite.prepare(`SELECT * FROM users`).all())
-          console.log('userlist', userList)
 
           const user = await db.query.users.findFirst({
             where: eq(users.email, email),
@@ -67,4 +61,6 @@ export const authOptions: AuthOptions = {
   }
 };
 
-export default NextAuth(authOptions);
+export default async function(req: NextApiRequest, res: NextApiResponse): Promise<any> {
+  return await (NextAuth(authOptions))(req, res);
+};
